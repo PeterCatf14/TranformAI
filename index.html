@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="TransformAI - Tu app de transformación física personalizada con planes de entrenamiento y nutrición adaptativos.">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>TransformAI - Transformación Física Personalizada</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SPLASH SCREEN                              -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="splash-screen" class="screen active">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="logo-ring">
+                    <svg viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="grad-splash-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF2D55"/>
+                                <stop offset="100%" style="stop-color:#FF6B35"/>
+                            </linearGradient>
+                            <linearGradient id="grad-splash-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#30D158"/>
+                                <stop offset="100%" style="stop-color:#63E6BE"/>
+                            </linearGradient>
+                            <linearGradient id="grad-splash-3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#5E5CE6"/>
+                                <stop offset="100%" style="stop-color:#BF5AF2"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="ring ring-outer" cx="60" cy="60" r="52" stroke="url(#grad-splash-1)"/>
+                        <circle class="ring ring-middle" cx="60" cy="60" r="42" stroke="url(#grad-splash-2)"/>
+                        <circle class="ring ring-inner" cx="60" cy="60" r="32" stroke="url(#grad-splash-3)"/>
+                    </svg>
+                </div>
+                <h1 class="splash-title">Transform<span class="accent">AI</span></h1>
+                <p class="splash-subtitle">Tu transformación comienza aquí</p>
+            </div>
+            <div class="splash-loader">
+                <div class="loader-bar"><div class="loader-fill"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- ONBOARDING SCREENS                         -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="onboarding-screen" class="screen">
+        <div class="onboarding-container">
+            <!-- Progress bar -->
+            <div class="onboarding-progress">
+                <div class="progress-bar">
+                    <div id="onboarding-progress-fill" class="progress-fill" style="width: 16.6%"></div>
+                </div>
+                <span id="onboarding-step-label" class="step-label">Paso 1 de 6</span>
+            </div>
+
+            <div id="onboarding-step-1" class="onboarding-step active">
+                <div class="step-icon">👤</div>
+                <h2>¿Quién eres?</h2>
+                <p class="step-description">Queremos saber tu nombre y género.</p>
+                <div class="form-group">
+                    <label for="input-name">Nombre completo</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="input-name" placeholder="Ej. Juan Pérez">
+                    </div>
+                </div>
+                <div style="margin-top:20px;">
+                    <p class="step-description">Define tu entorno de entrenamiento</p>
+                    <div class="mode-toggle-pill" id="onboarding-mode-toggle" style="background:var(--bg-card); border-radius:12px; padding:4px; display:flex;">
+                        <button class="mode-btn active" data-mode="gym" style="flex:1; background:var(--red); color:white; border:none; padding:10px; border-radius:10px; font-weight:700;">GIMNASIO</button>
+                        <button class="mode-btn" data-mode="home" style="flex:1; background:transparent; color:var(--text-tertiary); border:none; padding:10px; border-radius:10px; font-weight:700;">EN CASA</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:20px;">
+                    <label>Sexo</label>
+                    <div class="toggle-group" id="sex-toggle">
+                        <button class="toggle-btn" data-value="male">♂ Masc.</button>
+                        <button class="toggle-btn" data-value="female">♀ Fem.</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-age">Edad</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="input-age" placeholder="25">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Body Metrics -->
+            <div id="onboarding-step-2" class="onboarding-step">
+                <div class="step-icon">⚖️</div>
+                <h2>Medidas Corporales</h2>
+                <p class="step-description">Estos datos son clave para calcular tu metabolismo.</p>
+                <div class="form-group">
+                    <label for="input-weight">Peso actual <span id="weight-unit-lbl">(kg)</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" id="input-weight" placeholder="70" min="30" max="400" step="0.1">
+                        <div class="unit-toggle" id="unit-toggle" style="margin-left: 8px;">
+                            <button class="unit-btn active" data-unit="kg">kg</button>
+                            <button class="unit-btn" data-unit="lbs">lbs</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-height">Altura</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="input-height" placeholder="175" min="100" max="250">
+                        <span class="input-suffix">cm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Activity Level -->
+            <div id="onboarding-step-3" class="onboarding-step">
+                <div class="step-icon">🏃</div>
+                <h2>Nivel de Actividad</h2>
+                <p class="step-description">¿Qué tan activo eres en tu día a día?</p>
+                <div class="option-cards" id="activity-options">
+                    <button class="option-card" data-value="sedentary">
+                        <span class="card-emoji">🪑</span>
+                        <span class="card-title">Sedentario</span>
+                        <span class="card-desc">Trabajo de oficina, poco movimiento</span>
+                    </button>
+                    <button class="option-card" data-value="light">
+                        <span class="card-emoji">🚶</span>
+                        <span class="card-title">Ligeramente activo</span>
+                        <span class="card-desc">Ejercicio ligero 1-3 días/semana</span>
+                    </button>
+                    <button class="option-card" data-value="moderate">
+                        <span class="card-emoji">🏋️</span>
+                        <span class="card-title">Moderadamente activo</span>
+                        <span class="card-desc">Ejercicio moderado 3-5 días/semana</span>
+                    </button>
+                    <button class="option-card" data-value="active">
+                        <span class="card-emoji">💪</span>
+                        <span class="card-title">Muy activo</span>
+                        <span class="card-desc">Ejercicio intenso 6-7 días/semana</span>
+                    </button>
+                    <button class="option-card" data-value="extra">
+                        <span class="card-emoji">🔥</span>
+                        <span class="card-title">Extremadamente activo</span>
+                        <span class="card-desc">Atleta profesional / trabajo físico</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Goal -->
+            <div id="onboarding-step-4" class="onboarding-step">
+                <div class="step-icon">🎯</div>
+                <h2>Tu Objetivo</h2>
+                <p class="step-description">¿Qué quieres lograr con TransformAI?</p>
+                <div class="option-cards goal-cards" id="goal-options">
+                    <button class="option-card goal-muscle" data-value="muscle">
+                        <span class="card-emoji">💪</span>
+                        <span class="card-title">Ganar Masa Muscular</span>
+                        <span class="card-desc">Hipertrofia y fuerza</span>
+                    </button>
+                    <button class="option-card goal-fat" data-value="fat_loss">
+                        <span class="card-emoji">🔥</span>
+                        <span class="card-title">Perder Grasa</span>
+                        <span class="card-desc">Definición y quema de calorías</span>
+                    </button>
+                    <button class="option-card goal-recomp" data-value="recomp">
+                        <span class="card-emoji">⚡</span>
+                        <span class="card-title">Recomposición Corporal</span>
+                        <span class="card-desc">Ganar músculo y perder grasa</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Diet Preferences -->
+            <div id="onboarding-step-5" class="onboarding-step">
+                <div class="step-icon">🥗</div>
+                <h2>Preferencias Alimenticias</h2>
+                <p class="step-description">Personalizaremos tu plan nutricional.</p>
+                <div class="option-cards" id="diet-options">
+                    <button class="option-card" data-value="omnivore">
+                        <span class="card-emoji">🥩</span>
+                        <span class="card-title">Omnívoro</span>
+                        <span class="card-desc">Sin restricciones alimenticias</span>
+                    </button>
+                    <button class="option-card" data-value="vegetarian">
+                        <span class="card-emoji">🥚</span>
+                        <span class="card-title">Vegetariano</span>
+                        <span class="card-desc">Sin carne, incluye lácteos y huevos</span>
+                    </button>
+                    <button class="option-card" data-value="vegan">
+                        <span class="card-emoji">🌱</span>
+                        <span class="card-title">Vegano</span>
+                        <span class="card-desc">100% basado en plantas</span>
+                    </button>
+                    <button class="option-card" data-value="keto">
+                        <span class="card-emoji">🥑</span>
+                        <span class="card-title">Keto / Low Carb</span>
+                        <span class="card-desc">Alto en grasas, bajo en carbohidratos</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 6: Allergies -->
+            <div id="onboarding-step-6" class="onboarding-step">
+                <div class="step-icon">⚠️</div>
+                <h2>Alergias e Intolerancias</h2>
+                <p class="step-description">Selecciona las que apliquen (puedes elegir varias o ninguna).</p>
+                <div class="chip-group" id="allergy-chips">
+                    <button class="chip" data-value="gluten">🌾 Gluten</button>
+                    <button class="chip" data-value="lactose">🥛 Lactosa</button>
+                    <button class="chip" data-value="nuts">🥜 Frutos secos</button>
+                    <button class="chip" data-value="eggs">🥚 Huevos</button>
+                    <button class="chip" data-value="soy">🫘 Soja</button>
+                    <button class="chip" data-value="shellfish">🦐 Mariscos</button>
+                    <button class="chip" data-value="fish">🐟 Pescado</button>
+                    <button class="chip" data-value="none">✅ Ninguna</button>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="onboarding-nav">
+                <button id="btn-prev" class="btn btn-secondary" style="visibility: hidden;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Anterior
+                </button>
+                <button id="btn-next" class="btn btn-primary">
+                    Siguiente
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- MAIN APP                                   -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div id="main-app" class="screen">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <span class="greeting" id="greeting-text">Buenos días</span>
+                <h1 class="user-name" id="user-name-display">Usuario</h1>
+            </div>
+            <div class="header-right">
+                <div class="sync-badge" id="sync-badge" title="Última sincronización">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                </div>
+                <button class="avatar-btn" id="btn-profile" aria-label="Perfil" style="position:relative; overflow:hidden; width:36px; height:36px; border-radius:50%; border:2px solid var(--border-color);">
+                    <img id="user-profile-img-header" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:none;">
+                    <div id="user-profile-icon-header" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab Content -->
+        <main class="tab-content">
+            <!-- ═══ DASHBOARD TAB ═══ -->
+            <div id="tab-dashboard" class="tab-panel active">
+                <!-- Summary Cards -->
+                <section class="summary-section">
+                    <h2 class="section-title">Resumen del Día</h2>
+                    <div class="rings-container v3-grid">
+                        <!-- Ring 1: Burned -->
+                        <div class="ring-card" id="ring-burned-card">
+                            <svg class="progress-ring" viewBox="0 0 140 140">
+                                <circle class="ring-bg" cx="70" cy="70" r="58" />
+                                <circle class="ring-progress" cx="70" cy="70" r="58" stroke="#FF2D55" id="ring-burn-progress"/>
+                            </svg>
+                            <div class="ring-info">
+                                <span class="ring-value" id="ring-burn-value">0</span>
+                                <span class="ring-label">QUEM.</span>
+                            </div>
+                            <p class="ring-title">Quema</p>
+                        </div>
+                        <!-- Ring 2: Workouts -->
+                        <div class="ring-card" id="ring-workout-card">
+                            <svg class="progress-ring" viewBox="0 0 140 140">
+                                <circle class="ring-bg" cx="70" cy="70" r="58" />
+                                <circle class="ring-progress" cx="70" cy="70" r="58" stroke="#30D158" id="ring-work-progress"/>
+                            </svg>
+                            <div class="ring-info">
+                                <span class="ring-value" id="ring-work-value">0</span>
+                                <span class="ring-label">ENTR.</span>
+                            </div>
+                            <p class="ring-title">Entrenos</p>
+                        </div>
+                        <!-- Ring 3: Steps -->
+                        <div class="ring-card" id="ring-steps-card">
+                            <svg class="progress-ring" viewBox="0 0 140 140">
+                                <circle class="ring-bg" cx="70" cy="70" r="58" />
+                                <circle class="ring-progress" cx="70" cy="70" r="58" stroke="#0A84FF" id="ring-steps-progress"/>
+                            </svg>
+                            <div class="ring-info">
+                                <span class="ring-value" id="ring-steps-value">0</span>
+                                <span class="ring-label">PASOS</span>
+                            </div>
+                            <p class="ring-title">Pasos</p>
+                        </div>
+                        <!-- Ring 4: Water -->
+                        <div class="ring-card" id="ring-water-card">
+                            <svg class="progress-ring" viewBox="0 0 140 140">
+                                <circle class="ring-bg" cx="70" cy="70" r="58" />
+                                <circle class="ring-progress" cx="70" cy="70" r="58" stroke="#64D2FF" id="ring-water-progress"/>
+                            </svg>
+                            <div class="ring-info">
+                                <span class="ring-value" id="ring-water-dash-value">0</span>
+                                <span class="ring-label">ML</span>
+                            </div>
+                            <p class="ring-title">Agua</p>
+                        </div>
+                        <!-- Ring 5: Consumed -->
+                        <div class="ring-card" id="ring-consumed-card">
+                            <svg class="progress-ring" viewBox="0 0 140 140">
+                                <circle class="ring-bg" cx="70" cy="70" r="58" />
+                                <circle class="ring-progress" cx="70" cy="70" r="58" stroke="var(--orange)" id="ring-consumed-progress"/>
+                            </svg>
+                            <div class="ring-info">
+                                <span class="ring-value" id="ring-consumed-value">0</span>
+                                <span class="ring-label">CONS.</span>
+                            </div>
+                            <p class="ring-title">Comida</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="water-section glass-card" style="margin-top: 15px;">
+                    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 class="card-title">Consumo de Agua</h3>
+                        <span id="dash-water-val" style="font-weight:700; color:var(--cyan);">0 ml</span>
+                    </div>
+                </section>
+
+                <!-- Macros Overview -->
+                <section class="macros-section glass-card">
+                    <h3 class="card-title">Macronutrientes Hoy</h3>
+                    <div class="macros-bars">
+                        <div class="macro-row">
+                            <div class="macro-label">
+                                <span class="macro-dot protein"></span>
+                                <span>Proteínas</span>
+                            </div>
+                            <div class="macro-bar-container">
+                                <div class="macro-bar protein-bar" id="dash-protein-bar" style="width:0%"></div>
+                            </div>
+                            <span class="macro-value" id="dash-protein-val">0g / 0g</span>
+                        </div>
+                        <div class="macro-row">
+                            <div class="macro-label">
+                                <span class="macro-dot carbs"></span>
+                                <span>Carbohidratos</span>
+                            </div>
+                            <div class="macro-bar-container">
+                                <div class="macro-bar carbs-bar" id="dash-carbs-bar" style="width:0%"></div>
+                            </div>
+                            <span class="macro-value" id="dash-carbs-val">0g / 0g</span>
+                        </div>
+                        <div class="macro-row">
+                            <div class="macro-label">
+                                <span class="macro-dot fats"></span>
+                                <span>Grasas</span>
+                            </div>
+                            <div class="macro-bar-container">
+                                <div class="macro-bar fats-bar" id="dash-fats-bar" style="width:0%"></div>
+                            </div>
+                            <span class="macro-value" id="dash-fats-val">0g / 0g</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Today's Workout Preview -->
+                <section class="today-workout glass-card" id="today-workout-card">
+                    <div class="workout-card-header">
+                        <div>
+                            <h3 class="card-title">Entreno de Hoy</h3>
+                            <p class="card-subtitle" id="today-workout-name">Cargando...</p>
+                        </div>
+                        <button class="btn btn-small btn-primary" id="btn-start-today-workout">Iniciar</button>
+                    </div>
+                    <div class="workout-preview-exercises" id="today-workout-preview"></div>
+                </section>
+
+                <!-- Last Watch Sync Card -->
+                <section class="watch-sync-card glass-card" id="watch-sync-card">
+                    <div class="hk-header">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                        <h3>Última Validación</h3>
+                    </div>
+                    <div class="hk-stats" id="last-sync-stats">
+                        <div class="hk-stat">
+                            <span class="hk-stat-value" id="sync-heart-rate">--</span>
+                            <span class="hk-stat-label">BPM prom</span>
+                        </div>
+                        <div class="hk-divider"></div>
+                        <div class="hk-stat">
+                            <span class="hk-stat-value" id="sync-calories">--</span>
+                            <span class="hk-stat-label">kcal activas</span>
+                        </div>
+                        <div class="hk-divider"></div>
+                        <div class="hk-stat">
+                            <span class="hk-stat-value" id="sync-duration">--</span>
+                            <span class="hk-stat-label">duración</span>
+                        </div>
+                    </div>
+                    <p class="hk-notice" id="sync-notice">Sube un resumen de Apple Watch en la pestaña Entreno</p>
+                </section>
+
+                <!-- Streaks and Badges -->
+                <section class="badges-section glass-card" style="margin-top:20px;">
+                    <div class="badges-header">
+                        <h3 class="card-title">Racha Actual</h3>
+                        <div class="streak-count">🔥 <span id="streak-days">0</span> días</div>
+                    </div>
+                    <div class="badges-container" id="badges-container">
+                        <!-- Badges will be injected here -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- ═══ WORKOUT TAB ═══ -->
+            <div id="tab-workout" class="tab-panel">
+                <!-- Weekly Plan View -->
+                <div id="workout-plan-view">
+                    <div class="section-header">
+                        <h2 class="section-title">Plan Semanal <span id="workout-week-badge" class="badge">Semana 1</span></h2>
+                        <div class="mode-toggle-pill" id="workout-mode-toggle" style="background:var(--bg-glass); border:1px solid var(--border-subtle); border-radius:20px; padding:2px; display:inline-flex; align-items:center;">
+                            <button class="mode-btn active" data-mode="gym" style="background:var(--red); color:white; border:none; padding:4px 12px; border-radius:18px; font-size:0.7rem; font-weight:700;">🏋️ GIMNASIO</button>
+                            <button class="mode-btn" data-mode="home" style="background:transparent; color:var(--text-tertiary); border:none; padding:4px 12px; border-radius:18px; font-size:0.7rem; font-weight:700;">🏠 EN CASA</button>
+                        </div>
+                    </div>
+                    <div class="week-days" id="week-days-container"></div>
+
+                    <!-- Upload Apple Watch Evidence -->
+                    <div class="upload-evidence-section glass-card" id="upload-evidence-section">
+                        <div class="upload-header">
+                            <div class="upload-header-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Validación Visual</h3>
+                                <p class="card-subtitle">Sube tu resumen de Apple Watch</p>
+                            </div>
+                        </div>
+                        <div class="upload-dropzone" id="upload-dropzone">
+                            <input type="file" id="watch-image-input" accept="image/*" hidden>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <p class="dropzone-text">Toca para subir foto o captura</p>
+                            <p class="dropzone-hint">Apple Watch · iPhone Fitness</p>
+                        </div>
+                        <div class="upload-preview hidden" id="upload-preview">
+                            <img id="preview-image" alt="Preview">
+                            <div class="preview-actions">
+                                <button class="btn btn-secondary btn-small" id="btn-change-image">Cambiar</button>
+                                <button class="btn btn-primary btn-small" id="btn-analyze-image">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                                    Analizar con IA
+                                </button>
+                            </div>
+                        </div>
+                        <div class="analyzing-state hidden" id="analyzing-state">
+                            <div class="analyzing-spinner"></div>
+                            <p class="analyzing-text">Analizando imagen con OCR...</p>
+                            <div class="analyzing-progress-bar"><div class="analyzing-progress-fill" id="ocr-progress-fill"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCR Results Confirmation Modal -->
+                <div id="ocr-results-modal" class="modal hidden">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content glass-card ocr-modal-content">
+                        <h2>📊 Resumen Detectado</h2>
+                        <p class="ocr-subtitle">Confirma los datos extraídos de tu captura</p>
+                        <div class="ocr-result-preview">
+                            <img id="ocr-result-thumb" alt="Captura analizada">
+                        </div>
+                        <div class="ocr-fields">
+                            <div class="ocr-field">
+                                <label>🔥 Calorías Quemadas</label>
+                                <div class="input-wrapper"><input type="number" id="ocr-calories" placeholder="0"><span class="input-suffix">kcal</span></div>
+                            </div>
+                            <div class="ocr-field">
+                                <label>⏱ Duración</label>
+                                <div class="input-wrapper"><input type="text" id="ocr-duration" placeholder="45:00"><span class="input-suffix">min</span></div>
+                            </div>
+                            <div class="ocr-field">
+                                <label>💓 FC Promedio</label>
+                                <div class="input-wrapper"><input type="number" id="ocr-heartrate" placeholder="0"><span class="input-suffix">BPM</span></div>
+                            </div>
+                            <div class="ocr-field">
+                                <label>🏋️ Tipo de Ejercicio</label>
+                                <div class="input-wrapper"><input type="text" id="ocr-exercise-type" placeholder="Entrenamiento de fuerza"></div>
+                            </div>
+                        </div>
+                        <div class="ocr-match-status" id="ocr-match-status"></div>
+                        <div class="ocr-nutrition-adjust" id="ocr-nutrition-adjust" style="display:none;"></div>
+                        <div class="ocr-actions">
+                            <button class="btn btn-secondary" id="btn-ocr-cancel">Cancelar</button>
+                            <button class="btn btn-primary" id="btn-ocr-confirm">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+                                Confirmar y Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Workout View (hidden by default) -->
+                <div id="active-workout-view" class="hidden">
+                    <div class="active-workout-header">
+                        <button class="btn-icon" id="btn-back-to-plan">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div>
+                            <h2 id="active-workout-title">Entrenamiento</h2>
+                            <p class="active-workout-timer" id="workout-timer">00:00</p>
+                        </div>
+                        <button class="btn btn-small btn-danger" id="btn-finish-workout">Finalizar</button>
+                    </div>
+                    <div class="workout-controls" style="display:flex; gap:10px; padding:0 24px 15px 24px;">
+                        <button class="btn btn-secondary btn-small" id="btn-pause-workout" style="flex:1;">⏸ Pausar</button>
+                        <button class="btn btn-danger btn-small" id="btn-cancel-workout" style="flex:1;">❌ Cancelar</button>
+                    </div>
+                    <div id="active-exercises-list" class="exercise-list"></div>
+                </div>
+
+                <!-- Workout Complete Modal -->
+                <div id="workout-complete-modal" class="modal hidden">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content glass-card">
+                        <div class="modal-celebration">🎉</div>
+                        <h2>¡Entreno Completado!</h2>
+                        <div class="workout-summary-stats">
+                            <div class="summary-stat">
+                                <span class="summary-stat-value" id="summary-time">00:00</span>
+                                <span class="summary-stat-label">Tiempo</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-value" id="summary-volume">0 kg</span>
+                                <span class="summary-stat-label">Volumen</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="summary-stat-value" id="summary-calories">0</span>
+                                <span class="summary-stat-label">kcal</span>
+                            </div>
+                        </div>
+                        <div class="progressive-overload-notice" id="overload-notice" style="display:none;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                            <span>¡Sobrecarga progresiva aplicada! Pesos actualizados para la próxima semana.</span>
+                        </div>
+                        <div class="share-actions" style="margin-top: 15px;">
+                            <button class="btn btn-secondary btn-full" id="btn-share-workout">
+                                📸 Tomar Foto y Compartir
+                            </button>
+                        </div>
+                        <button class="btn btn-primary btn-full" id="btn-close-summary" style="margin-top: 10px;">Cerrar</button>
+                    </div>
+                </div>
+
+                <!-- Social Share Modal -->
+                <div id="social-share-modal" class="modal hidden">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content glass-card share-modal-content">
+                        <h2>Comparte tu Victoria</h2>
+                        <div class="camera-preview-container" id="camera-container" style="display:none;">
+                            <video id="camera-feed" autoplay playsinline></video>
+                            <button class="btn btn-primary" id="btn-take-photo" style="position:absolute; bottom:15px; left:50%; transform:translateX(-50%); z-index:10; border-radius:30px;">📸 Capturar</button>
+                        </div>
+                        <div class="share-card-preview" id="share-card-preview">
+                            <img id="share-user-photo" style="display:none;" />
+                            <div class="share-card-overlay">
+                                <h3 id="share-workout-name">Entrenamiento</h3>
+                                <div class="share-stats">
+                                    <span>⏱ <span id="share-time"></span></span>
+                                    <span>🔥 <span id="share-cal"></span> kcal</span>
+                                    <span>💪 <span id="share-vol"></span> kg</span>
+                                </div>
+                                <div class="share-brand">TransformAI</div>
+                            </div>
+                        </div>
+                        <div class="share-actions-row">
+                            <button class="btn btn-secondary" id="btn-retake-photo" style="display:none;">Retomar</button>
+                            <button class="btn btn-primary" id="btn-save-share" style="display:none;">Guardar Publicación</button>
+                            <button class="btn btn-secondary" id="btn-cancel-share">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Badge Celebration Modal -->
+                <div id="badge-celebration-modal" class="modal hidden" style="z-index: 10000;">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content glass-card" style="background: var(--bg-card); animation: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                        <div class="modal-celebration" style="font-size: 5rem; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);">🏅</div>
+                        <style>
+                        @keyframes badge-pop {
+                            0% { transform: scale(0.5); opacity: 0; }
+                            70% { transform: scale(1.1); }
+                            100% { transform: scale(1); opacity: 1; }
+                        }
+                        </style>
+                        <h2 style="color: #FFD700;">¡Nueva Insignia!</h2>
+                        <p id="badge-celebration-text" style="font-size: 1.2rem; font-weight: 600;">¡Racha lograda!</p>
+                        <p style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 15px;">Toca para continuar</p>
+                    </div>
+                </div>
+
+                <!-- Workout History -->
+                <div class="section-header" style="margin-top: 24px; display:flex; justify-content:space-between; align-items:center;">
+                    <h2 class="section-title">Historial</h2>
+                </div>
+                <div id="workout-history-list" class="history-list"></div>
+            </div>
+
+            <!-- ═══ NUTRITION TAB ═══ -->
+            <div id="tab-nutrition" class="tab-panel">
+                <div class="section-header">
+                    <h2 class="section-title">Plan Nutricional</h2>
+                </div>
+
+                <!-- Calorie Target -->
+                <section class="calorie-target glass-card">
+                    <div class="cal-target-header">
+                        <div class="cal-target-ring">
+                            <svg viewBox="0 0 80 80">
+                                <circle class="ring-bg-sm" cx="40" cy="40" r="34" />
+                                <circle class="ring-progress-sm" cx="40" cy="40" r="34" id="nutrition-ring-progress" />
+                            </svg>
+                            <div class="ring-info">
+                                <span class="cal-ring-percent" id="cal-percent">0%</span>
+                            </div>
+                        </div>
+                        <div class="cal-target-text">
+                            <h3>Meta Diaria</h3>
+                            <p class="cal-target-value" id="cal-target-display">0 kcal</p>
+                        </div>
+                    </div>
+                    <div class="macros-targets">
+                        <div class="macro-target">
+                            <span class="macro-target-dot protein"></span>
+                            <span class="macro-name">Proteínas</span>
+                            <span class="macro-target-val" id="macro-protein-target">0g</span>
+                        </div>
+                        <div class="macro-target">
+                            <span class="macro-target-dot carbs"></span>
+                            <span class="macro-name">Carbohidratos</span>
+                            <span class="macro-target-val" id="macro-carbs-target">0g</span>
+                        </div>
+                        <div class="macro-target">
+                            <span class="macro-target-dot fats"></span>
+                            <span class="macro-name">Grasas</span>
+                            <span class="macro-target-val" id="macro-fats-target">0g</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Water Tracker -->
+                <section class="water-tracker glass-card" style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div>
+                            <h3 class="card-title">Hidratación Diaria</h3>
+                            <p class="cal-target-value" id="water-amount-lbl" style="font-size: 1.5rem; color:var(--cyan); background:none;-webkit-text-fill-color:var(--cyan);">0 ml</p>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-secondary" id="btn-water-camera" style="border-radius:30px; width:45px; height:45px; padding:0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            </button>
+                            <button class="btn btn-primary" id="btn-add-water" style="border-radius:30px; width:45px; height:45px; padding:0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="width:100%; height:12px; background:var(--bg-tertiary); border-radius:10px; overflow:hidden;">
+                        <div id="water-progress-fill" style="height:100%; width:0%; background:var(--cyan); border-radius:10px; transition:width 0.4s;"></div>
+                    </div>
+                </section>
+                
+                <!-- Daily Meals Section -->
+                <section class="nutrition-section glass-card" style="margin-top:20px;">
+                    <div class="section-header" style="margin-bottom:15px;">
+                        <h3 class="section-title">Comidas para Hoy</h3>
+                    </div>
+                    <div id="meals-list" class="meals-list">
+                        <!-- Meals will be injected here -->
+                    </div>
+                    
+                    <div style="margin-top:30px; padding-top:20px; border-top:1px solid var(--border-subtle);">
+                        <button class="btn btn-secondary btn-full" id="btn-weekly-calendar" style="border-style:dashed; background:rgba(255,255,255,0.05); color:var(--text-primary); height:60px;">
+                            📅 Ver Calendario Semanal y Compras
+                        </button>
+                    </div>
+                </section>
+
+                <!-- AI Food Scanner -->
+                <section class="food-scanner-section glass-card" style="margin-top:20px;">
+                    <div class="upload-header">
+                        <div class="upload-header-icon" style="background:var(--cyan);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="12" cy="12" r="3"/><path d="M15 9l2-2"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Escanear Comida (IA)</h3>
+                            <p class="card-subtitle">Sube foto para estimar macros</p>
+                        </div>
+                    </div>
+                    <div class="upload-dropzone" id="food-dropzone">
+                        <input type="file" id="food-image-input" accept="image/*" hidden>
+                        <p class="dropzone-text">+ Toca para la Cámara o Galería</p>
+                    </div>
+                    <div class="upload-preview hidden" id="food-preview">
+                        <img id="food-preview-img" alt="Plato">
+                        <div class="analyzing-state hidden" id="food-analyzing-state" style="margin-top:10px;">
+                            <div class="analyzing-spinner"></div>
+                            <p>La IA está analizando los ingredientes...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Food OCR Results Modal -->
+                <div id="food-results-modal" class="modal hidden">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content glass-card">
+                        <h2>🍽 Análisis de IA</h2>
+                        <p class="ocr-subtitle">Macros estimados de la imagen</p>
+                        <div class="ocr-fields">
+                            <div class="ocr-field">
+                                <label>Descripción del Plato</label>
+                                <div class="input-wrapper"><input type="text" id="food-ai-name"></div>
+                            </div>
+                            <div class="ocr-field">
+                                <label>Calorías Estimadas</label>
+                                <div class="input-wrapper"><input type="number" id="food-ai-cal"><span class="input-suffix">kcal</span></div>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <div class="ocr-field" style="flex:1">
+                                    <label>Proteínas</label>
+                                    <div class="input-wrapper"><input type="number" id="food-ai-p"><span class="input-suffix">g</span></div>
+                                </div>
+                                <div class="ocr-field" style="flex:1">
+                                    <label>Carbos</label>
+                                    <div class="input-wrapper"><input type="number" id="food-ai-c"><span class="input-suffix">g</span></div>
+                                </div>
+                                <div class="ocr-field" style="flex:1">
+                                    <label>Grasas</label>
+                                    <div class="input-wrapper"><input type="number" id="food-ai-f"><span class="input-suffix">g</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ocr-actions" style="margin-top:20px;">
+                            <button class="btn btn-secondary" id="btn-food-cancel">Descartar</button>
+                            <button class="btn btn-primary" id="btn-food-confirm">Agregar a mi día</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ═══ PROFILE TAB ═══ -->
+            <div id="tab-profile" class="tab-panel">
+                <div class="profile-header-card glass-card">
+                    <div class="profile-avatar" id="profile-avatar-trigger" style="position:relative; overflow:hidden; cursor:pointer;">
+                        <img id="user-profile-img" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:none;">
+                        <div id="user-profile-icon" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="8" r="4"/>
+                                <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+                            </svg>
+                        </div>
+                        <div class="avatar-edit-overlay" style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.5); padding:2px; font-size:0.6rem; color:white; text-align:center;">EDITAR</div>
+                    </div>
+                    <input type="file" id="profile-img-input" accept="image/*" hidden>
+                    <div class="profile-info">
+                        <h2 id="profile-name">Usuario</h2>
+                        <p id="profile-goal-label">Objetivo: --</p>
+                    </div>
+                </div>
+
+                <section class="profile-stats glass-card">
+                    <h3>Tus Datos</h3>
+                    <div class="profile-stats-grid">
+                        <div class="profile-stat-item">
+                            <span class="profile-stat-label">Edad</span>
+                            <span class="profile-stat-value" id="profile-age">--</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span class="profile-stat-label">Peso</span>
+                            <span class="profile-stat-value" id="profile-weight">-- kg</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span class="profile-stat-label">Altura</span>
+                            <span class="profile-stat-value" id="profile-height">-- cm</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span class="profile-stat-label">TMB</span>
+                            <span class="profile-stat-value" id="profile-bmr">-- kcal</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span class="profile-stat-label">TDEE</span>
+                            <span class="profile-stat-value" id="profile-tdee">-- kcal</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span class="profile-stat-label">Meta</span>
+                            <span class="profile-stat-value" id="profile-cal-target">-- kcal</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="profile-prefs glass-card">
+                    <h3>Preferencias</h3>
+                    <div class="pref-item">
+                        <span class="pref-label">Dieta</span>
+                        <span class="pref-value" id="profile-diet">--</span>
+                    </div>
+                    <div class="pref-item">
+                        <span class="pref-label">Actividad</span>
+                        <span class="pref-value" id="profile-activity">--</span>
+                    </div>
+                    <div class="pref-item">
+                        <span class="pref-label">Alergias</span>
+                        <span class="pref-value" id="profile-allergies">--</span>
+                    </div>
+                </section>
+
+                <!-- AI Coach Progress Scan -->
+                <section class="coach-section glass-card" style="margin-top:20px;">
+                    <div class="upload-header" style="margin-bottom:10px;">
+                        <div class="upload-header-icon" style="background:#30D158;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Coach Virtual (IA)</h3>
+                        </div>
+                    </div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:15px;">Sube fotos de progreso frontal/espalda para análisis de simetría y ajuste de rutina.</p>
+                    <div class="upload-dropzone" id="progress-dropzone">
+                        <input type="file" id="progress-image-input" accept="image/*" hidden>
+                        <p class="dropzone-text">+ Tomar/Subir Foto de Progreso</p>
+                    </div>
+                    <div class="coach-analysis hidden" id="coach-analysis-card" style="margin-top:15px; background:var(--bg-card); padding:15px; border-radius:12px; border:1px solid #30D158;">
+                        <h4 style="color:#30D158; margin-bottom:10px;">🤖 Reporte de Coach IA</h4>
+                        <div id="coach-report" style="font-size:0.9rem; line-height:1.5;"></div>
+                        <button class="btn btn-primary btn-small" id="btn-apply-coach-advice" style="margin-top:15px; width:100%">Aplicar cambios de rutina</button>
+                    </div>
+                </section>
+
+                <button class="btn btn-danger btn-full" id="btn-reset-profile" style="margin-top:16px;">
+                    Reiniciar Perfil
+                </button>
+                <!-- Weekly Meal Calendar Modal -->
+                <div id="weekly-calendar-modal" class="modal hidden">
+                    <div class="modal-backdrop"></div>
+                    <div class="modal-content glass-card" style="max-height:85vh; overflow-y:auto; padding:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h2>📅 Plan Semanal</h2>
+                            <button id="btn-close-calendar" class="btn-icon" style="background:transparent; border:none; color:var(--text-tertiary);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div id="calendar-days-list" style="display:flex; flex-direction:column; gap:15px;"></div>
+                        <div style="margin-top:30px; border-top:1px solid var(--border-subtle); padding-top:20px;">
+                            <h3>🛒 Lista de Compras</h3>
+                            <ul id="shopping-list" style="list-style:none; padding:10px 0; font-size:0.9rem; color:var(--text-secondary);"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Tab Bar -->
+        <nav class="tab-bar">
+            <button class="tab-item active" data-tab="dashboard" id="tab-btn-dashboard">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                <span>Inicio</span>
+            </button>
+            <button class="tab-item" data-tab="workout" id="tab-btn-workout">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M8.5 4v16M15.5 4v16M8.5 12h7"/>
+                </svg>
+                <span>Entreno</span>
+            </button>
+            <button class="tab-item" data-tab="nutrition" id="tab-btn-nutrition">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                    <path d="M12 2v20M2 12h20" opacity="0.3"/>
+                    <path d="M12 6a4 4 0 014 4c0 2-4 8-4 8s-4-6-4-8a4 4 0 014-4z"/>
+                </svg>
+                <span>Nutrición</span>
+            </button>
+            <button class="tab-item" data-tab="profile" id="tab-btn-profile">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+                </svg>
+                <span>Perfil</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
